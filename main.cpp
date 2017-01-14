@@ -1,5 +1,5 @@
 #include "printf.hpp"
 
 int main(){
-    printf("foo");
+    int len = printf("foo");
 }
