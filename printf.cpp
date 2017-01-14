@@ -46,7 +46,17 @@ int intToString(int64_t input, char * const output){
 //	} while((input /= 10) != 0);
 
 }
-int intToHex(uint64_t input, char * const output){
+char* intToHex(uint64_t input){
+    char asciiforhex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+    char hexdigits[8];
+    size_t getnibble = 0x0000000f;
+    size_t index;
+
+    for(int i = 7; i > -1; i++){
+        index = input & getnibble;
+        hexdigits[i] = asciiforhex[index];    
+    }    
+
 
 }
 
