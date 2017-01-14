@@ -1,5 +1,4 @@
 #include "printf.hpp"
-
 #define NULL nullptr
 
 char* getConvertedValue(char type, va_list args);
@@ -33,6 +32,16 @@ int printf(const char *fmt, ...){
 }
 
 
+char* intToString(int64_t input){
+
+}
+char* intToHex(uint64_t input){
+
+}
+char* doubleToString(double input){
+
+}
+
 
 int snprintf(char *dest, size_t size, const char *fmt, ...){
 	
@@ -44,11 +53,11 @@ int snprintf(char *dest, size_t size, const char *fmt, ...){
 char* getConvertedValue(char type, va_list args){
 	switch(type){
 		case 'd':
-			break;
+			return intToString(va_arg(args, int64_t));
 		case 'x':
-			break;
+			return intToHex(va_arg(args, uint64_t));
 		case 'f':
-			break;
+			return doubleToString(va_arg(args, double));
 		case 's':
 			return va_arg(args, char*);
 		case '%':
@@ -57,3 +66,6 @@ char* getConvertedValue(char type, va_list args){
 			return NULL;
 	}
 }
+
+
+
