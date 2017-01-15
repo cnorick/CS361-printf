@@ -10,12 +10,12 @@ int printf(const char *fmt, ...){
 	char c;
 	int len = 0;
 	char valueString[MAX_ARRAY_SIZE];
-	char * chptr = valueString;
 
 	va_list args;
 	va_start(args, fmt);
 
 	while(c = *fmt++){ // Breaks when '\0' is encountered.
+		char *chptr = valueString;
 		if(c == '%'){
 			if(getConvertedValue(*fmt++, args, chptr) == -1)
 				return -1; // printf doc says return negative on failure.
@@ -37,15 +37,37 @@ int printf(const char *fmt, ...){
 
 
 int intToString(int64_t input, char * const output){
-	char backwardsString[100];
+	char backwardsString[MAX_ARRAY_SIZE];
+	int i = 0, j = 0;
 
-//	do{
-//		int temp = input % 10; // Gets the least significant digit.
+	// Convert input to positive if it is negative.
+	// The smallest negative when multiplied by -1 is larger than the largest positive,
+	// so we have to account for that in the if block.
+	if(input < 0){
+		input++;
+		input *= -1;
+		output[j++] = '-';
 
+		backwardsString[i++] = (char) ('0' + (input % 10) + 1); // input % 10 is the least significant digit.
+		input /= 10;
+	}
 
-//	} while((input /= 10) != 0);
+	do{
 
+		backwardsString[i++] = (char) ('0' + input % 10); // input % 10 is the least significant digit.
+
+	} while((input /= 10) != 0);
+	i--;
+
+	// Reversing the string for output.
+	while(i >= 0)
+		output[j++] = backwardsString[i--];
+
+	output[j++] = '\0';
+
+	return 0;
 }
+
 int intToHex(uint64_t input, char * const output){
 
 }
