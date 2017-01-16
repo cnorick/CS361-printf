@@ -109,7 +109,20 @@ void RemovePadding(char *&hexdigits){
     return;    
 }
 
+// Loads sign, exponent, and fraction with the appropriate values from input.
+void getDoubleParts(int64_t input, bool *positive, int64_t *exponent, int64_t *fraction){
+    *positive = (input & (0x1ll << 63)) == 0;
+    *exponent = (input & (0x7ffll << 63)) >> 52; // exponent is located in range [52,62].
+    *fraction = input & 0xfffffffffffffll;
+}
+
 int doubleToString(double input, char * const output){
+    bool positive;
+    int64_t exponent, fraction;
+
+    getDoubleParts((int64_t)input, &positive, &exponent, &fraction);
+    printf("is positive: %d\n", positive);
+    printf("exponent part: %d\n", exponent);
     return 0;
 }
 
