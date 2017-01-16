@@ -1,6 +1,9 @@
 #include "printf.hpp"
 
 int main(){
+
+  printf("%x\n", 4560);
+  
 	int64_t biggestInt = 9223372036854775807;
 	int64_t smallestInt = -9223372036854775808;
 	int64_t foo = 12;
@@ -14,4 +17,6 @@ int main(){
 		
 //	printf("%d", 0);
 
+
 }
+
