@@ -36,6 +36,39 @@ int printf(const char *fmt, ...){
 	return len;
 }
 
+int snprintf(char *dest, size_t size, const char *fmt, ...){
+	char c;
+	int len = 0;
+	char valueString[MAX_ARRAY_SIZE];
+
+	va_list args;
+	va_start(args, fmt);
+
+	while((c = *fmt++)){ // Breaks when '\0' is encountered.
+		char *chptr = valueString;
+		if(c == '%'){
+			if(getConvertedValue(*fmt++, args, chptr) == -1)
+				return -1; // snprintf doc says return negative on failure.
+			while((c = *chptr++)){
+				len++;
+				if(len < size)
+					dest[len] = c;
+			}
+		}
+		else{
+			len++;
+			if(len < size)
+				dest[len] = c;
+		}
+	}
+
+	dest[len + 1 < size ? len + 1 : size] = '\0'; // Put the null char at the smallest of len and size.
+
+	va_end(args);
+
+	return len;
+}
+
 
 int intToString(int64_t input, char * const output){
 	char backwardsString[MAX_ARRAY_SIZE];
@@ -70,57 +103,53 @@ int intToString(int64_t input, char * const output){
 }
 
 int intToHex(uint64_t input, char * const output){
-    char asciiforhex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
-    char hexdigits[17];
-    char *chptr = hexdigits;
-    size_t getnibble = 0x0000000f;
-    size_t index;
+	char asciiforhex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+	char hexdigits[17];
+	char *chptr = hexdigits;
+	size_t getnibble = 0x0000000f;
+	size_t index;
 
 
-    //use bit arithmetic to find the hex digit for each nibble then place the hex character into the array
-    for(int i = 15; i > -1; i--){
-        index = input & getnibble;
-        hexdigits[i] = asciiforhex[index >> ((15-i)*4)];
-        getnibble = getnibble << 4;    
-    }    
-    
-    hexdigits[16] = '\0';
-    RemovePadding(chptr); //remove leading 0s
-    
-    //place the hex representation into the output array in the format 0x...
-    output[0] = '0';
-    output[1] = 'x';
+	//use bit arithmetic to find the hex digit for each nibble then place the hex character into the array
+	for(int i = 15; i > -1; i--){
+		index = input & getnibble;
+		hexdigits[i] = asciiforhex[index >> ((15-i)*4)];
+		getnibble = getnibble << 4;    
+	}    
 
-    for(int i = 0; i < 17; i++){
-        output[2+i] = *(chptr+i);
-        if(*(chptr+i) == '\0') break;
-    }
+	hexdigits[16] = '\0';
+	RemovePadding(chptr); //remove leading 0s
 
-    return 0;
+	//place the hex representation into the output array in the format 0x...
+	output[0] = '0';
+	output[1] = 'x';
+
+	for(int i = 0; i < 17; i++){
+		output[2+i] = *(chptr+i);
+		if(*(chptr+i) == '\0') break;
+	}
+
+	return 0;
 }
 
 void RemovePadding(char *&hexdigits){
-    //remove leading zeros loop stops when it reaches a nonzero or there is one character left
-    //this is so that 0 is represented 
-    for(int i = 0; i < 15; i++){
-        if(*hexdigits == '0') hexdigits++;
-        else break;
-    }
-    return;    
+	//remove leading zeros loop stops when it reaches a nonzero or there is one character left
+	//this is so that 0 is represented 
+	for(int i = 0; i < 15; i++){
+		if(*hexdigits == '0') hexdigits++;
+		else break;
+	}
+	return;    
 }
 
 int doubleToString(double input, char * const output){
-    return 0;
+	return 0;
 }
 
-
-int snprintf(char *dest, size_t size, const char *fmt, ...){
-    return 0;
-}
 
 // Takes the type (d,x,f,s) as provided in the format string, and the va_list of
 // args accompyaning the format string. Based on the type, it stores in output a c string
-// (ends with '\0') representation of the next arg in args. Returns null on invalid type.
+// (ends with '\0') representation of the next arg in args. Returns -1 on invalid type.
 int getConvertedValue(char type, va_list args, char * const output){
 	switch(type){
 		case 'd':
