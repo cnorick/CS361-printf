@@ -1,7 +1,7 @@
 #include "printf.hpp"
 #define NULL nullptr
 
-#define MAX_ARRAY_SIZE 30 // This is the biggest char array we need to hold any of the converted strings.
+#define MAX_ARRAY_SIZE 10000 // This is the biggest char array we need to hold any of the converted strings.
 
 int getConvertedValue(char type, va_list args, char * const output);
 char *strcopy(char *destination, const char *source);

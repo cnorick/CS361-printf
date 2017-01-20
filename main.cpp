@@ -36,5 +36,9 @@ int main(){
 	len = snprintf(snprintfTest, 30, "%x : %s : %d", 1024, "poop", 1024);
 	printf("snprintf multiple param test: %s\n", snprintfTest);
 	printf("snprintf len: %d\n\n", len);
+
+	len = snprintf(snprintfTest, 30, "asdfasdflkasjdflaksjdflakdjfalskdfjalskdfjalsdkfalsdkfjalsdkfjalsdkfalskdfalskdfalskdfjalsdkfjalsdkfjalsdkfj END");
+	printf("snprintf huge string test: %s\n", snprintfTest);
+	printf("snprintf len: %d\n\n", len);
 }
 
