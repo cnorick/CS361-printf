@@ -38,27 +38,26 @@ int printf(const char *fmt, ...){
 
 int snprintf(char *dest, size_t size, const char *fmt, ...){
 	char c;
-	int len = 0;
+	int len = 0; // The length of the string returned by getConvertedValue.
 	char valueString[MAX_ARRAY_SIZE];
 
 	va_list args;
 	va_start(args, fmt);
 
+	// Parse through format string one character at a time.
 	while((c = *fmt++)){ // Breaks when '\0' is encountered.
 		char *chptr = valueString;
 		if(c == '%'){
 			if(getConvertedValue(*fmt++, args, chptr) == -1)
 				return -1; // snprintf doc says return negative on failure.
 			while((c = *chptr++)){
-				len++;
-				if(len < size)
-					dest[len] = c;
+				if(len < size - 1) // -1 to account for null char.
+					dest[len++] = c;
 			}
 		}
 		else{
-			len++;
-			if(len < size)
-				dest[len] = c;
+			if(len < size - 1)
+				dest[len++] = c;
 		}
 	}
 
