@@ -3,13 +3,13 @@
 
 #define MAX_ARRAY_SIZE 10000 // This is the biggest char array we need to hold any of the converted strings.
 
-int getConvertedValue(char type, va_list args, char * const output);
+int getConvertedValue(char type, va_list args, char * const output, int precision);
 char *strcopy(char *destination, const char *source);
 void RemovePadding(char *&hexdigits);
 
 int printf(const char *fmt, ...){
 	char c;
-	int len = 0;
+	int len = 0, precision = 6;
 	char valueString[MAX_ARRAY_SIZE];
 
 	va_list args;
@@ -17,9 +17,16 @@ int printf(const char *fmt, ...){
 
 	while((c = *fmt++)){ // Breaks when '\0' is encountered.
 		char *chptr = valueString;
+
 		if(c == '%'){
-			if(getConvertedValue(*fmt++, args, chptr) == -1)
+			if(*fmt == '.') {
+				fmt++;
+				precision = *fmt++ - '0';
+			}
+
+			if(getConvertedValue(*fmt++, args, chptr, precision) == -1)
 				return -1; // printf doc says return negative on failure.
+
 			while((c = *chptr++)){
 				write(1, &c, 1);
 				len++;
@@ -39,6 +46,7 @@ int printf(const char *fmt, ...){
 int snprintf(char *dest, size_t size, const char *fmt, ...){
 	char c;
 	int len = 0; // The length of the string returned by getConvertedValue.
+	int precision = 6;
 	char valueString[MAX_ARRAY_SIZE];
 
 	va_list args;
@@ -48,7 +56,12 @@ int snprintf(char *dest, size_t size, const char *fmt, ...){
 	while((c = *fmt++)){ // Breaks when '\0' is encountered.
 		char *chptr = valueString;
 		if(c == '%'){
-			if(getConvertedValue(*fmt++, args, chptr) == -1)
+			if(*fmt == '.') {
+				fmt++;
+				precision = *fmt++ - '0';
+			}
+
+			if(getConvertedValue(*fmt++, args, chptr, precision) == -1)
 				return -1; // snprintf doc says return negative on failure.
 			while((c = *chptr++)){
 				if(len < size - 1) // -1 to account for null char.
@@ -182,14 +195,14 @@ int doubleToString(double input, char * const output, int precision){
 // Takes the type (d,x,f,s) as provided in the format string, and the va_list of
 // args accompyaning the format string. Based on the type, it stores in output a c string
 // (ends with '\0') representation of the next arg in args. Returns -1 on invalid type.
-int getConvertedValue(char type, va_list args, char * const output){
+int getConvertedValue(char type, va_list args, char * const output, int precision){
 	switch(type){
 		case 'd':
 			return intToString(va_arg(args, int64_t), output);
 		case 'x':
 			return intToHex(va_arg(args, uint64_t), output);
 		case 'f':
-			return doubleToString(va_arg(args, double), output, 3);
+			return doubleToString(va_arg(args, double), output, precision);
 		case 's':
 			strcopy(output, va_arg(args, char*));
 			return 0;
