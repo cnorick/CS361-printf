@@ -38,27 +38,26 @@ int printf(const char *fmt, ...){
 
 int snprintf(char *dest, size_t size, const char *fmt, ...){
 	char c;
-	int len = 0;
+	int len = 0; // The length of the string returned by getConvertedValue.
 	char valueString[MAX_ARRAY_SIZE];
 
 	va_list args;
 	va_start(args, fmt);
 
+	// Parse through format string one character at a time.
 	while((c = *fmt++)){ // Breaks when '\0' is encountered.
 		char *chptr = valueString;
 		if(c == '%'){
 			if(getConvertedValue(*fmt++, args, chptr) == -1)
 				return -1; // snprintf doc says return negative on failure.
 			while((c = *chptr++)){
-				len++;
-				if(len < size)
-					dest[len] = c;
+				if(len < size - 1) // -1 to account for null char.
+					dest[len++] = c;
 			}
 		}
 		else{
-			len++;
-			if(len < size)
-				dest[len] = c;
+			if(len < size - 1)
+				dest[len++] = c;
 		}
 	}
 
@@ -142,7 +141,40 @@ void RemovePadding(char *&hexdigits){
 	return;    
 }
 
-int doubleToString(double input, char * const output){
+int doubleToString(double input, char * const output, int precision){
+	int intPart;
+	double fractionPart;
+	char intString[MAX_ARRAY_SIZE];
+	char fractionString[MAX_ARRAY_SIZE];
+	char *outputIterator = output;
+	
+	intPart = (int) input; // Truncates off the fraction part.
+	fractionPart = input - intPart;
+
+	// Get the int part.
+	intToString(intPart, intString);
+
+	// Get the fraction part to one past the correct precision.
+	for(int i = 0; i <= precision; i++)
+		fractionPart *= 10;
+
+	// These operations along with the following cast effectively round the fractionPart.
+	fractionPart += 5;
+	fractionPart /= 10;
+
+	// Casting fractionPart to int64 truncates off everything past the '.'
+	intToString((int64_t)fractionPart, fractionString);
+
+	strcopy(outputIterator, intString);
+
+	// Iterate output to the null char following the int part.
+	while(*++outputIterator);
+
+	// Then add a '.' followed by the rounded fraction part.
+	*outputIterator++ = '.';
+
+	strcopy(outputIterator, fractionString);
+
 	return 0;
 }
 
@@ -157,7 +189,7 @@ int getConvertedValue(char type, va_list args, char * const output){
 		case 'x':
 			return intToHex(va_arg(args, uint64_t), output);
 		case 'f':
-			return doubleToString(va_arg(args, double), output);
+			return doubleToString(va_arg(args, double), output, 3);
 		case 's':
 			strcopy(output, va_arg(args, char*));
 			return 0;

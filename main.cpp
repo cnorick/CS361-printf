@@ -10,6 +10,7 @@ int main(){
     int64_t bar = -15;
     char testString[20] = "Woo String!!";
 	int len;
+	double testDouble = 1234.56789;
 
     printf("%x\n", 5678);
     printf("Biggest int in hex: %x\n", biggestInt);
@@ -17,7 +18,12 @@ int main(){
     printf("0 in hex: %x\n", 0);
     printf("-1 in hex: %x\n", -1);
     printf("foo %%\nThis is a string: %s\n", testString);
-    printf("These are ints: %d, %d\nThis is the biggest 64-bit int: %d\nThis is the smallest int: %d\nThis is zero: %d\n\n", foo, bar, biggestInt, smallestInt, 0);
+    printf("These are ints: %d, %d\nThis is the biggest 64-bit int: %d\nThis is the smallest int: %d\nThis is zero: %d\n", foo, bar, biggestInt, smallestInt, 0);
+	printf("This is a double: %f\n", testDouble);
+	printf("This is a negative double: %f\n", -15.0);
+	printf("This is 0.0: %f\n", 0.0);
+
+	printf("\n");
 
 
 	char snprintfTest[30];
