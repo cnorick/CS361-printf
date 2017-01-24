@@ -6,37 +6,18 @@
 int getConvertedValue(char type, va_list args, char * const output, int precision);
 char *strcopy(char *destination, const char *source);
 void RemovePadding(char *&hexdigits);
+int _snprintf(char *dest, size_t size, const char *fmt, va_list args);
 
 int printf(const char *fmt, ...){
-	char c;
-	int len = 0, precision = 6;
 	char valueString[MAX_ARRAY_SIZE];
+	char *charptr = valueString, c;
 
 	va_list args;
 	va_start(args, fmt);
 
-	while((c = *fmt++)){ // Breaks when '\0' is encountered.
-		char *chptr = valueString;
+	int len = _snprintf(valueString, MAX_ARRAY_SIZE, fmt, args);
 
-		if(c == '%'){
-			if(*fmt == '.') {
-				fmt++;
-				precision = *fmt++ - '0';
-			}
-
-			if(getConvertedValue(*fmt++, args, chptr, precision) == -1)
-				return -1; // printf doc says return negative on failure.
-
-			while((c = *chptr++)){
-				write(1, &c, 1);
-				len++;
-			}
-		}
-		else{
-			write(1, &c, 1);
-			len++;
-		}
-	}
+	write(1, valueString, len);
 
 	va_end(args);
 
@@ -44,17 +25,27 @@ int printf(const char *fmt, ...){
 }
 
 int snprintf(char *dest, size_t size, const char *fmt, ...){
+	va_list args;
+	va_start(args, fmt);
+	
+	int len = _snprintf(dest, size, fmt, args);
+
+	va_end(args);
+
+	return len;
+}
+
+// Internal version of _snprintf that does most of the work for printf and snprintf.
+int _snprintf(char *dest, size_t size, const char *fmt, va_list args) {
+	char valueString[MAX_ARRAY_SIZE];
 	char c;
 	int len = 0; // The length of the string returned by getConvertedValue.
 	int precision = 6;
-	char valueString[MAX_ARRAY_SIZE];
-
-	va_list args;
-	va_start(args, fmt);
 
 	// Parse through format string one character at a time.
-	while((c = *fmt++)){ // Breaks when '\0' is encountered.
+	while((c = *fmt++)) { // Breaks when '\0' is encountered.
 		char *chptr = valueString;
+
 		if(c == '%'){
 			if(*fmt == '.') {
 				fmt++;
@@ -63,20 +54,18 @@ int snprintf(char *dest, size_t size, const char *fmt, ...){
 
 			if(getConvertedValue(*fmt++, args, chptr, precision) == -1)
 				return -1; // snprintf doc says return negative on failure.
+
 			while((c = *chptr++)){
-				if(len < size - 1) // -1 to account for null char.
-					dest[len++] = c;
+				if(++len < size - 1) // -1 to account for null char.
+					dest[len - 1] = c;
 			}
 		}
-		else{
-			if(len < size - 1)
-				dest[len++] = c;
-		}
+
+		else if(++len < size - 1)
+			dest[len - 1] = c;
 	}
 
-	dest[len + 1 < size ? len + 1 : size] = '\0'; // Put the null char at the smallest of len and size.
-
-	va_end(args);
+	dest[len < size ? len : size] = '\0'; // Put the null char at the smallest of len and size.
 
 	return len;
 }
