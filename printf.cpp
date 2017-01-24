@@ -3,10 +3,10 @@
 
 #define MAX_ARRAY_SIZE 10000 // This is the biggest char array we need to hold any of the converted strings.
 
+int _snprintf(char *dest, size_t size, const char *fmt, va_list args);
 int getConvertedValue(char type, va_list args, char * const output, int precision);
 char *strcopy(char *destination, const char *source);
 void RemovePadding(char *&hexdigits);
-int _snprintf(char *dest, size_t size, const char *fmt, va_list args);
 
 int printf(const char *fmt, ...){
 	char valueString[MAX_ARRAY_SIZE];
@@ -69,7 +69,10 @@ int _snprintf(char *dest, size_t size, const char *fmt, va_list args) {
 	return len;
 }
 
-
+// Converts an int64_t to a string and stores the string in output.
+// Function assumes that ouput is large enough to hold the generated
+// string. Appends a null character to output before returning.
+// Function returns 0 upon success.
 int intToString(int64_t input, char * const output){
 	char backwardsString[MAX_ARRAY_SIZE];
 	int i = 0, j = 0;
@@ -102,6 +105,10 @@ int intToString(int64_t input, char * const output){
 	return 0;
 }
 
+// Converts a uint64_t to a string and stores the string in output.
+// Function assumes that ouput is large enough to hold the generated
+// string. Appens a null character to output before returning.
+// Function retunrs a 0 upon success.
 int intToHex(uint64_t input, char * const output){
 	char asciiforhex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 	char hexdigits[17];
@@ -132,16 +139,11 @@ int intToHex(uint64_t input, char * const output){
 	return 0;
 }
 
-void RemovePadding(char *&hexdigits){
-	//remove leading zeros loop stops when it reaches a nonzero or there is one character left
-	//this is so that 0 is represented 
-	for(int i = 0; i < 15; i++){
-		if(*hexdigits == '0') hexdigits++;
-		else break;
-	}
-	return;    
-}
-
+// Converts a double to a string having <precision> characters to the right
+// of the decimal place, and stores the string in output.
+// Function assumes that output is large enough to hold the generated
+// string. Appens a null character to output before returning.
+// Function retunrs a 0 upon success.
 int doubleToString(double input, char * const output, int precision){
 	int intPart;
 	double fractionPart;
@@ -193,8 +195,8 @@ int doubleToString(double input, char * const output, int precision){
 }
 
 
-// Takes the type (d,x,f,s) as provided in the format string, and the va_list of
-// args accompyaning the format string. Based on the type, it stores in output a c string
+// Takes the type (d,x,f,s,%) as provided in the format string, and the va_list of
+// args accompanying the format string. Based on the type, it stores in output a c string
 // (ends with '\0') representation of the next arg in args. Returns -1 on invalid type.
 int getConvertedValue(char type, va_list args, char * const output, int precision){
 	switch(type){
@@ -214,6 +216,17 @@ int getConvertedValue(char type, va_list args, char * const output, int precisio
 		default:
 			return -1;
 	}
+}
+
+// Removes leading 0's from hex string.
+void RemovePadding(char *&hexdigits){
+	//remove leading zeros loop stops when it reaches a nonzero or there is one character left
+	//this is so that 0 is represented 
+	for(int i = 0; i < 15; i++){
+		if(*hexdigits == '0') hexdigits++;
+		else break;
+	}
+	return;    
 }
 
 // Copies the c string from source to destination. Returns destination.
