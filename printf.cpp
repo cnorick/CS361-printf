@@ -10,7 +10,6 @@ int _snprintf(char *dest, size_t size, const char *fmt, va_list args);
 
 int printf(const char *fmt, ...){
 	char valueString[MAX_ARRAY_SIZE];
-	char *charptr = valueString, c;
 
 	va_list args;
 	va_start(args, fmt);
@@ -149,22 +148,28 @@ int doubleToString(double input, char * const output, int precision){
 	char intString[MAX_ARRAY_SIZE];
 	char fractionString[MAX_ARRAY_SIZE];
 	char *outputIterator = output;
+
+	// Take care of negatives.
+	if(input < 0) {
+		*outputIterator++ = '-';
+		input *= -1;
+	}
 	
-	intPart = (int) input; // Truncates off the fraction part.
-	fractionPart = input - intPart;
+	intPart = (int) input; // Truncates off everything on the right of the decimal.
+	fractionPart = input - intPart; // Everything on the right of the decimal.
 
-	// Get the int part.
-	intToString(intPart, intString);
-
-	// Get the fraction part to one past the correct precision.
-	for(int i = 0; i <= precision; i++)
+	// Move the fraction part to be an integer to one past the correct precision.
+	for(int i = 0; i < precision + 1; i++)
 		fractionPart *= 10;
 
 	// These operations along with the following cast effectively round the fractionPart.
 	fractionPart += 5;
 	fractionPart /= 10;
 
-	// Casting fractionPart to int64 truncates off everything past the '.'
+	// Get the int part.
+	intToString(intPart, intString);
+
+	// Casting fractionPart to int64 truncates off everything on the right of the '.'
 	intToString((int64_t)fractionPart, fractionString);
 
 	strcopy(outputIterator, intString);
@@ -172,10 +177,17 @@ int doubleToString(double input, char * const output, int precision){
 	// Iterate output to the null char following the int part.
 	while(*++outputIterator);
 
-	// Then add a '.' followed by the rounded fraction part.
+	// Then replace the '\0' with a '.' and add the rounded fraction part to the end of the string.
 	*outputIterator++ = '.';
 
-	strcopy(outputIterator, fractionString);
+	// For the special case when the fraction part is 0, we have to add the extra 0's ourselves.
+	if((int64_t)fractionPart == 0) {
+		for(int i = 0; i < precision; i++)
+			*outputIterator++ = '0';
+		*outputIterator++ = '\0';
+	}
+	else 
+		strcopy(outputIterator, fractionString);
 
 	return 0;
 }
