@@ -148,7 +148,7 @@ int doubleToString(double input, char * const output, int precision){
 	int intPart;
 	double fractionPart;
 	char intString[MAX_ARRAY_SIZE];
-	char fractionString[MAX_ARRAY_SIZE];
+	char fractionString[precision + 1]; // There's an extra space here for the trailing '\0'.
 	char *outputIterator = output;
 
 	// Take care of negatives.
@@ -174,6 +174,19 @@ int doubleToString(double input, char * const output, int precision){
 	// Casting fractionPart to int64 truncates off everything on the right of the '.'
 	intToString((int64_t)fractionPart, fractionString);
 
+	// Add the correct number of leading 0's to the fraction part.
+	// Move the contents of fractionString all the way to the right of the array.
+	// Then put 0's in the empty spots on the left.
+	int j = precision;
+	for(int i = precision; i >= 0; i--, j--) {
+		if(fractionString[i] == '\0')
+			j = precision; // The end of the array.
+		fractionString[j] = fractionString[i];
+	}
+	// Replace the stuff at the beginning of the array with 0's;
+	for(; j >= 0; j--)
+		fractionString[j] = '0';
+
 	strcopy(outputIterator, intString);
 
 	// Iterate output to the null char following the int part.
@@ -182,14 +195,7 @@ int doubleToString(double input, char * const output, int precision){
 	// Then replace the '\0' with a '.' and add the rounded fraction part to the end of the string.
 	*outputIterator++ = '.';
 
-	// For the special case when the fraction part is 0, we have to add the extra 0's ourselves.
-	if((int64_t)fractionPart == 0) {
-		for(int i = 0; i < precision; i++)
-			*outputIterator++ = '0';
-		*outputIterator++ = '\0';
-	}
-	else 
-		strcopy(outputIterator, fractionString);
+	strcopy(outputIterator, fractionString);
 
 	return 0;
 }

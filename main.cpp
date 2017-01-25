@@ -13,6 +13,7 @@ int main(){
 	double negDouble = -15.1;
 	double doubleWithNoFraction = 1.0;
 	double zero = 0.0;
+	double testDouble2 = 0.000001;
 
     printf("Hex yay: %x\n", 5678);
     printf("Biggest int in hex: %x\n", biggestInt);
@@ -27,6 +28,8 @@ int main(){
 	printf("This is a negative double: %f\n", negDouble);
 	printf("This is a double with no fraction part: %f\n", doubleWithNoFraction);
 	printf("This is 0.0: %f\n", zero);
+	printf("This is another double: %f\n", testDouble2);
+	printf("This is another double with precision 2: %.2f\n", 1.01);
 	printf("1 precision double: %.1f\n", testDouble);
 	printf("2 precision double: %.2f\n", testDouble);
 	printf("3 precision double: %.3f\n", testDouble);
