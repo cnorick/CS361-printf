@@ -113,7 +113,7 @@ int intToHex(uint64_t input, char * const output){
 	char asciiforhex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 	char hexdigits[17];
 	char *chptr = hexdigits;
-	size_t getnibble = 0x0000000f;
+	size_t getnibble = 0xf;
 	size_t index;
 
 
@@ -147,6 +147,7 @@ int intToHex(uint64_t input, char * const output){
 int doubleToString(double input, char * const output, int precision){
 	int intPart;
 	double fractionPart;
+        double rounder;
 	char intString[MAX_ARRAY_SIZE];
 	char fractionString[MAX_ARRAY_SIZE];
 	char *outputIterator = output;
@@ -160,20 +161,27 @@ int doubleToString(double input, char * const output, int precision){
 	intPart = (int) input; // Truncates off everything on the right of the decimal.
 	fractionPart = input - intPart; // Everything on the right of the decimal.
 
-	// Move the fraction part to be an integer to one past the correct precision.
-	for(int i = 0; i < precision + 1; i++)
-		fractionPart *= 10;
+        //Shift the rounder to one more than the precision of the double
+	rounder = 5.5;
+        for(int i = 0; i < precision + 1; i++)
+		rounder /= 10;
 
-	// These operations along with the following cast effectively round the fractionPart.
-	fractionPart += 5;
-	fractionPart /= 10;
+
+	//This operation will effectively round the double
+        fractionPart += rounder;
+    
 
 	// Get the int part.
 	intToString(intPart, intString);
 
-	// Casting fractionPart to int64 truncates off everything on the right of the '.'
-	intToString((int64_t)fractionPart, fractionString);
+        //Get the fractional part
+        for(int i = 0; i < precision; i++){
+            fractionPart *= 10;
+            fractionString[i] = '0' + (int64_t) fractionPart % 10;
+            fractionString[i+1] = '\0';
+        }
 
+        //copy the integer string to the output array
 	strcopy(outputIterator, intString);
 
 	// Iterate output to the null char following the int part.
@@ -182,14 +190,8 @@ int doubleToString(double input, char * const output, int precision){
 	// Then replace the '\0' with a '.' and add the rounded fraction part to the end of the string.
 	*outputIterator++ = '.';
 
-	// For the special case when the fraction part is 0, we have to add the extra 0's ourselves.
-	if((int64_t)fractionPart == 0) {
-		for(int i = 0; i < precision; i++)
-			*outputIterator++ = '0';
-		*outputIterator++ = '\0';
-	}
-	else 
-		strcopy(outputIterator, fractionString);
+        //copy the fraction string to the output
+	strcopy(outputIterator, fractionString);
 
 	return 0;
 }
