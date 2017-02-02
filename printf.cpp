@@ -75,34 +75,21 @@ int _snprintf(char *dest, size_t size, const char *fmt, va_list args) {
 // Function returns 0 upon success.
 int intToString(int64_t input, char * const output){
 	char backwardsString[MAX_ARRAY_SIZE];
-	int i = 0, j = 0;
+	char *outputptr = output;
+    int i = 0, j = 0;
+    
+    if(input < 0) *outputptr++ = '-';;
+    while(input != 0){
+        backwardsString[i] = '0' + input % 10;
+        input /= 10;
+        if(input != 0) i++;
+    }
+    while(i >= 0){
+        *outputptr++ = backwardsString[i--];
+    }
+    *outputptr = '\0';
 
-	// Convert input to positive if it is negative.
-	// The smallest negative when multiplied by -1 is larger than the largest positive,
-	// so we have to account for that in the if block.
-	if(input < 0){
-		input++;
-		input *= -1;
-		output[j++] = '-';
-
-		backwardsString[i++] = (char) ('0' + (input % 10) + 1); // input % 10 is the least significant digit.
-		input /= 10;
-	}
-
-	do{
-
-		backwardsString[i++] = (char) ('0' + input % 10); // input % 10 is the least significant digit.
-
-	} while((input /= 10) != 0);
-	i--;
-
-	// Reversing the string for output.
-	while(i >= 0)
-		output[j++] = backwardsString[i--];
-
-	output[j++] = '\0';
-
-	return 0;
+    return 0;
 }
 
 // Converts a uint64_t to a string and stores the string in output.
