@@ -55,16 +55,16 @@ int _snprintf(char *dest, size_t size, const char *fmt, va_list args) {
 				return -1; // snprintf doc says return negative on failure.
 
 			while((c = *chptr++)){
-				if(++len < size - 1) // -1 to account for null char.
+				if(++len <= size - 1) // -1 to account for null char.
 					dest[len - 1] = c;
 			}
 		}
 
-		else if(++len < size - 1)
+		else if(++len <= size - 1)
 			dest[len - 1] = c;
 	}
 
-	dest[len < size ? len : size] = '\0'; // Put the null char at the smallest of len and size.
+	dest[len < size ? len : size-1] = '\0'; // Put the null char at the smallest of len and size.
 
 	return len;
 }
